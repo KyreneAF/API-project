@@ -5,12 +5,13 @@ const cors = require('cors');
 const csurf = require('csurf');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
+const { ValidationError } = require('sequelize');
 
 const { environment } = require('./config');
 const isProduction = environment === 'production';
 
-const app = express();
 const routes = require('./routes');
+const app = express();
 
 
 //middleware for logging info about requests
@@ -52,7 +53,7 @@ app.use(
       next(err);
     });
 
-    const { ValidationError } = require('sequelize');
+
 
 // ...
 
@@ -60,14 +61,10 @@ app.use(
 app.use((err, _req, _res, next) => {
   // check if error is a Sequelize error:
   if (err instanceof ValidationError) {
-    let errors = {};
-    for (let error of err.errors) {
-      errors[error.path] = error.message;
-    }
-    err.title = 'Validation error';
-    err.errors = errors;
+    err.errors = err.errors.map((e) => e.message);
+    err.title = 'Validation error'
   }
-  next(err);
+next(err)
 });
 
 app.use((err, _req, res, _next) => {
