@@ -1,7 +1,10 @@
 'use strict';
 
 const { User, Group } = require('../models');
-
+let options = {};
+if (process.env.NODE_ENV === 'production') {
+  options.schema = process.env.SCHEMA;  // define your schema in options object
+}
 const groups = [
   {
     user: 'brandon-Flores',
@@ -63,7 +66,8 @@ module.exports = {
         await Group.create({
           organizerId: foundUser.id,
           ...groupDetails,
-        });
+        }),
+        {validate:true}
       }
 
       console.log('Seed data inserted successfully.');
