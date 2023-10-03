@@ -4,7 +4,7 @@ const { Event, Group, Venue } = require('../models');
 
 const events = [
   {
-    venue: '123 Sunny rd.',
+    ven: '123 Sunny rd.',
     groupName: 'Trivia Night',
     name: 'Halloween Horror Movie Trivia',
     type: 'In person',
@@ -14,7 +14,7 @@ const events = [
     endDate: new Date('2023-10-31T22:00:00'),
   },
   {
-    venue: '222 Dessert dr.',
+    ven: '222 Dessert dr.',
     groupName: 'Cheese Tasting',
     name: 'First Cheese Meeting',
     type: 'In person',
@@ -24,7 +24,7 @@ const events = [
     endDate: new Date('2023-10-14T22:00:00'),
   },
   {
-    venue: '555 Tomorrow ln.',
+    ven: '555 Tomorrow ln.',
     groupName: 'Kitty social',
     name: 'Meet and Greet',
     type: 'Online',
@@ -34,7 +34,7 @@ const events = [
     endDate: new Date('2023-12-31T22:00:00'),
   },
   {
-    venue: '234 Government Camp',
+    ven: '234 Government Camp',
     groupName: 'Hiking Team',
     name: 'Spring Hike',
     type: 'In person',
@@ -44,7 +44,7 @@ const events = [
     endDate: new Date('2024-04-01T22:00:00'),
   },
   {
-    venue: '34 NE 11th Street',
+    ven: '34 NE 11th Street',
     groupName: 'Book Club',
     name: 'Twilight Reading',
     type: 'Online',
@@ -55,31 +55,23 @@ const events = [
   },
 ];
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     try {
       for (let eventData of events) {
-        const { venue, groupName, ...eventDetails } = eventData;
+        const { ven, groupName, ...eventDetails } = eventData;
 
-        const foundVenue = await Venue.findOne({
-          where: { address: venue },
+        // Find or create the Venue
+        const [foundVenue] = await Venue.findOrCreate({
+          where: { address: ven },
         });
 
-        if (!foundVenue) {
-          console.error(`Venue not found for address: ${venue}`);
-          continue;
-        }
-
-        const foundGroup = await Group.findOne({
+        // Find or create the Group
+        const [foundGroup] = await Group.findOrCreate({
           where: { name: groupName },
         });
 
-        if (!foundGroup) {
-          console.error(`Group not found for name: ${groupName}`);
-          continue;
-        }
-
+        // Create the Event
         await Event.create({
           venueId: foundVenue.id,
           groupId: foundGroup.id,
@@ -95,103 +87,35 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('Events', { name: events.map(event => event.name) }, {});
-  }
+    try {
+      for (let attend of attendances) {
+        const { eventName, user, status } = attend;
+
+        const foundEvent = await Event.findOne({
+          where: {
+            name: eventName,
+          },
+        });
+
+        const foundUser = await User.findOne({
+          where: {
+            username: user,
+          },
+        });
+
+        await Attendance.destroy({
+          where: {
+            eventId: foundEvent.id,
+            userId: foundUser.id,
+            status,
+          },
+        });
+      }
+
+      console.log('Seed data deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting seed data:', error);
+      throw error;
+    }
+  },
 };
-
-
-
-
-
-
-// 'use strict';
-// const {Event,Group,Venue} = require('../models')
-// let options = {};
-// if (process.env.NODE_ENV === 'production') {
-//   options.schema = process.env.SCHEMA;  // define your schema in options object
-// }
-
-// const events =[
-//   {
-//     venue:'123 Sunny rd.',
-//     groupName: 'Trivia Night',
-//     name: 'Halloween Horror Movie Trivia',
-//     type: 'In person',
-//     capacity: 20,
-//     price: 5,
-//     startDate: new Date('2023-10-31 20:00:00'),
-//     endDate: new Date('2023-10-31 22:00:00')
-//   },
-//   {
-//     venue:'222 Dessert dr.',
-//     groupName: 'Cheese Tasting',
-//     name: 'First Cheese Meeting',
-//     type: 'In person',
-//     capacity: 20,
-//     price: 25,
-//     startDate: new Date('2023-10-14 20:00:00'),
-//     endDate: new Date('2023-10-14 22:00:00')
-//   },
-//   {
-//     venue:'555 Tomorrow ln.',
-//     groupName: 'Kitty social',
-//     name: 'Meet and Greet',
-//     type: 'Online',
-//     capacity: 50,
-//     price: 0,
-//     startDate: new Date('2023-12-31 20:00:00'),
-//     endDate: new Date('2023-12-31 22:00:00')
-//   },
-//   {
-//     venue:'234 Government Camp',
-//     groupName: 'Hiking Team',
-//     name: 'Spring Hike',
-//     type: 'In person',
-//     capacity: 10,
-//     price: 10,
-//     startDate: new Date('2024-4-1 20:00:00'),
-//     endDate: new Date('2024-4-1 22:00:00')
-//   },
-//   {
-//     venue:'34 NE 11th Street',
-//     groupName: 'Book Club',
-//     name: 'Twilight Reading',
-//     type: 'Online',
-//     capacity: 15,
-//     price: 10,
-//     startDate: new Date('2024-4-1 20:00:00'),
-//     endDate: new Date('2024-4-1 22:00:00')
-//   },
-
-// ]
-
-
-// /** @type {import('sequelize-cli').Migration} */
-// module.exports = {
-//   async up (queryInterface, Sequelize) {
-//     for(let soloEvent of events){
-//       const {venue,groupName,...eventDetails}=soloEvent
-
-//       const foundVenue = await Venue.findOne({
-//         where:{
-//           address:venue
-//         }
-//       });
-//       const foundGrp = await Group.findOne({
-//         where:{
-//           name:groupName
-//         }
-//       });
-//       await Event.create({
-//         venueId:foundVenue.id,
-//         groupId:foundGrp.id,
-//         ...eventDetails
-//       }),
-//       {validate:true}
-//     }
-
-//   },
-//   async down(queryInterface, Sequelize) {
-//     await queryInterface.bulkDelete('Events', { name: events.map(event => event.name) }, {});
-//   }
-// }
