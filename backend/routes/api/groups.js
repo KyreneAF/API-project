@@ -4,29 +4,53 @@ const router = express.Router();
 
 const { Group, Membership, GroupImage, User,Venue} = require('../../db/models');
 
-/* GET all */
-// router.get('/', async (req, res) => {
-//     const numMembersSum = await Membership.sum('id')
+/* GET by ID */
+router.get('/:groupId',async(req,res) =>{
+    const id = req.params.groupId
 
-//     const allGroups = await Group.findAll({
-//             include:[{
-//                 model:GroupImage,
-//                 attributes:['url']
-//             }],
+    const numMembersSum = await Membership.count({
+        col: 'userId', // Count distinct users
+        where: {
+            groupId: id,
+            status: 'member'
+        }
+    });
+    const group = await Group.findByPk(id,{
+        include: [
+            {
+              model: GroupImage,
+              attributes: ['id', 'url', 'preview'],
+            },
+            {
+              model: User,
+              as:'Organizer',
+              attributes: ['id', 'firstName', 'lastName'],
+            },
+            {
+              model: Venue,
+              attributes: ['id','groupId','address','city','state','lat','lng'],
+            },
+          ],
 
-//     })
+        });
+        if(!group){
+            res.status(404)
+            return res.json({
+                "message": "Group couldn't be found",
+            })
+        }
+        const groupPojo = group.toJSON();
+      const resGroup = {
+         ...groupPojo,
+            numMembers: numMembersSum
+        }
 
-//     const resGroups = allGroups.map(grp => {
-//         const groupPojo = grp.toJSON();
-//         const {GroupImage,...restPojo} = groupPojo
-//         return {
-//           ...restPojo,
-//           numMembers: numMembersSum,
-//           previewImage: groupPojo.GroupImages[0] ? groupPojo.GroupImages[0].url : null,
-//         };
-//       });
-//     res.json({Groups:resGroups})
-// });
+       return res.json(resGroup)
+
+});
+
+
+/* Get all*/
 router.get('/', async(req,res)=>{
     const numMembersSum = await Membership.sum('id');
 
@@ -36,6 +60,11 @@ router.get('/', async(req,res)=>{
                 attributes:['url']
             }],
     });
+    if(!allGroups){
+        res.status(404)
+        return res.json({
+            "message": "Group couldn't be found",
+        })}
 
     const resGroup = allGroups.map(grp =>{
         let img;
@@ -61,53 +90,6 @@ router.get('/', async(req,res)=>{
     res.json(resGroup)
 
 })
-/* GET by ID */
-router.get('/:groupId',async(req,res) =>{
-    const id = req.params.groupId
-
-    const numMembersSum = await Membership.sum('id',{
-        where:{
-            groupId:id,
-            status:'member'
-        }
-    })
-    const group = await Group.findByPk(id,{
-        include: [
-            {
-              model: GroupImage,
-              attributes: ['id', 'url', 'preview'],
-            },
-            {
-              model: User,
-              as:'Organizer',
-              attributes: ['id', 'firstName', 'lastName'],
-            },
-            {
-              model: Venue,
-              attributes: ['id','groupId','address','city','state','lat','lng'],
-            },
-          ],
-
-        });
-        const groupPojo = group.toJSON();
-      const resGroup = {
-         ...groupPojo,
-            numMembers: numMembersSum
-        }
-
-       return res.json(resGroup)
-
-})
-
-
-
-
-module.exports = router;
-
-
-
-
-
 
 
 
