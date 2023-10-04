@@ -32,6 +32,11 @@ const attendances =[
     user:'HollyFlores1',
     status:'attending'
   },
+  {
+    eventName:'Halloween Horror Movie Trivia',
+    user: 'AshleyTisdale1',
+    status:'attending'
+  }
 ]
 
 

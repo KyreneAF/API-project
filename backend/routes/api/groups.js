@@ -1,8 +1,95 @@
 const express = require('express');
 
-const router = express.Router();
+const { Group, Membership, GroupImage, User,Venue,Attendance,Event} = require('../../db/models');
+const{restoreUser} = require('../../utils/auth');
+const{check,validationResult} = require('express-validator')
 
-const { Group, Membership, GroupImage, User,Venue} = require('../../db/models');
+const router = express.Router();
+router.use(restoreUser);
+
+const validCreateGroup = [
+    check('name')
+    .isLength({ max: 60 })
+    .withMessage('Name must be 60 characters or less'),
+    check('about')
+    .isLength({ min: 50 })
+    .withMessage('About must be 50 characters or more'),
+    check('type')
+    .isIn(['Online', 'In person'])
+    .withMessage('Type must be "Online" or "In person"'),
+    check('private')
+    .isBoolean()
+    .withMessage('Private must be a boolean'),
+    check('city')
+    .notEmpty()
+    .withMessage('City is required'),
+    check('state')
+    .notEmpty()
+    .withMessage('State is required'),
+  ];
+/* POST group */
+
+router.post('/', async(req,res) =>{
+    const errors = validationResult(req);
+    console.log(errors.param)
+    let {name,about,type,private,city,state} = req.body;
+    if(!errors.isEmpty()){
+        const resObj = errors.array().reduce((acc, error) => {
+            acc[error.param] = error.msg;
+            return acc;
+          }, {});
+        res.status = 400;
+        return res.json({
+            message:'Bad Request',
+            errors:resObj
+        })
+    };
+    const userId = req.user.id;
+    const createGroup = await Group.create({organizerId:userId,name,about,type,private,city,state})
+
+    return res.status(201).json(createGroup)
+})
+
+
+
+
+
+/*Get all groups by user*/
+// router.get('/current', restoreUser, async (req, res) => {
+//    const id = req.user.id;
+
+//    const groups = await Group.findAll({
+//     include:[
+//         {
+//         model:GroupImage,
+//         attributes:['url']
+//         },{
+//             model:Membership,
+//             attributes:[],
+//             whre:{
+//                 userId:id
+//             }
+//         }]
+//    });
+//    const resGroups = groups.map((group) => ({
+//     id: group.id,
+//     organizerId: group.organizerId,
+//     name: group.name,
+//     about: group.about,
+//     type: group.type,
+//     private: group.private,
+//     city: group.city,
+//     state: group.state,
+//     createdAt: group.createdAt,
+//     updatedAt: group.updatedAt,
+//     numMembers: group.Memberships,
+//     previewImage: group.GroupImages[0].url
+//   }));
+//   res.json({Groups:resGroups})
+
+// })
+
+
 
 /* GET by ID */
 router.get('/:groupId',async(req,res) =>{
