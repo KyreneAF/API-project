@@ -1,12 +1,16 @@
 'use strict';
 
 const { Event, Group, Venue } = require('../models');
-
+let options = {};
+if (process.env.NODE_ENV === 'production') {
+  options.schema = process.env.SCHEMA;  // define your schema in options object
+}
 const events = [
   {
     ven: '123 Sunny rd.',
     groupName: 'Trivia Night',
     name: 'Halloween Horror Movie Trivia',
+    description:'Join our spooky trivia night!',
     type: 'In person',
     capacity: 20,
     price: 5,
@@ -17,6 +21,7 @@ const events = [
     ven: '222 Dessert dr.',
     groupName: 'Cheese Tasting',
     name: 'First Cheese Meeting',
+    description:'Come join us for the first time with our very first meet and greet.',
     type: 'In person',
     capacity: 20,
     price: 25,
@@ -27,6 +32,7 @@ const events = [
     ven: '555 Tomorrow ln.',
     groupName: 'Kitty social',
     name: 'Meet and Greet',
+    description:'Visit our meet and greet where you can introduce your cat!',
     type: 'Online',
     capacity: 50,
     price: 0,
@@ -37,6 +43,7 @@ const events = [
     ven: '234 Government Camp',
     groupName: 'Hiking Team',
     name: 'Spring Hike',
+    description:'Come join us for our hike on our tallest mountain yet.',
     type: 'In person',
     capacity: 10,
     price: 10,
@@ -47,6 +54,7 @@ const events = [
     ven: '34 NE 11th Street',
     groupName: 'Book Club',
     name: 'Twilight Reading',
+    description:'Join our group of twilight reading for the spooky holiday',
     type: 'Online',
     capacity: 15,
     price: 10,
@@ -57,65 +65,30 @@ const events = [
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    try {
-      for (let eventData of events) {
-        const { ven, groupName, ...eventDetails } = eventData;
+    for(let eve of events){
+      const{ven,groupName,...eventDetails} = eve
 
-        // Find or create the Venue
-        const [foundVenue] = await Venue.findOrCreate({
-          where: { address: ven },
-        });
+      const foundVenue = await Venue.findOne({
+        where:{
+          address:ven
+        }
+      })
+      const foundGroup = await Group.findOne({
+        where:{
+          name:groupName
+        }
+      })
 
-        // Find or create the Group
-        const [foundGroup] = await Group.findOrCreate({
-          where: { name: groupName },
-        });
-
-        // Create the Event
-        await Event.create({
-          venueId: foundVenue.id,
-          groupId: foundGroup.id,
-          ...eventDetails,
-        });
-      }
-
-      console.log('Seed data inserted successfully.');
-    } catch (error) {
-      console.error('Error seeding data:', error);
-      throw error;
+      await Event.create({
+        venueId:null,
+        groupId:foundGroup.id,
+        ...eventDetails
+      },{validate:true})
     }
+
   },
 
   async down(queryInterface, Sequelize) {
-    try {
-      for (let attend of attendances) {
-        const { eventName, user, status } = attend;
-
-        const foundEvent = await Event.findOne({
-          where: {
-            name: eventName,
-          },
-        });
-
-        const foundUser = await User.findOne({
-          where: {
-            username: user,
-          },
-        });
-
-        await Attendance.destroy({
-          where: {
-            eventId: foundEvent.id,
-            userId: foundUser.id,
-            status,
-          },
-        });
-      }
-
-      console.log('Seed data deleted successfully.');
-    } catch (error) {
-      console.error('Error deleting seed data:', error);
-      throw error;
-    }
-  },
+    await queryInterface.bulkDelete('Events',{name: events.map(ev => ev.name)},{})
+  }
 };
