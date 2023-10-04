@@ -26,7 +26,7 @@ router.post(
     '/',
     handleValidationErrors,
     async (req, res, next) => {
-      const { credential, password } = req.body;
+      const { credential, password,firstName,lastName,email } = req.body;
 
       const user = await User.unscoped().findOne({
         where: {
@@ -44,6 +44,17 @@ router.post(
         err.errors = { credential: 'The provided credentials were invalid.' };
         return next(err);
       }
+      // if (!firstName || !lastName || !email.includes('@')) {
+      //   const err = new Error('Bad Request');
+      //   err.status = 400;
+      //   err.title = 'Bad Request';
+      //   err.errors = {
+      //     email: 'Invalid email',
+      //     firstName: 'First Name is required',
+      //     lastName: 'Last Name is required',
+      //   };
+      //   return next(err);
+      // }
 
       const safeUser = {
         id: user.id,
