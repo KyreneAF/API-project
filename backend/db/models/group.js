@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey:'groupId'
      });
      Group.belongsTo(models.User,{
-      foreignKey:'organizerId'
+      foreignKey:'organizerId',
+      as:'Organizer'
      });
      Group.hasMany(models.Membership,{
       foreignKey:'groupId'
@@ -23,7 +24,8 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey:'groupId'
      });
      Group.hasMany(models.GroupImage,{
-      foreignKey:'groupId'
+      foreignKey:'groupId',
+      
      })
     }
   }
