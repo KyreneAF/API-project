@@ -57,6 +57,8 @@ router.post(
     });
   }
 );
+/*GET current user */
+
 
 
 module.exports = router;
