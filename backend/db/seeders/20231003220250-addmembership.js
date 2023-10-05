@@ -34,10 +34,11 @@ const memberships =[
   },
   {
     usId: 'HollyFlores1',
-    grId: 'Book Club',
+    grId: 'Cheese Tasting',
     status:'co-host'
 
   },
+
 ]
 
 /** @type {import('sequelize-cli').Migration} */
