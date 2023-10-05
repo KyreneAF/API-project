@@ -59,6 +59,7 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('GroupImages',{group:groupImages.map(img => img.group)})
+    options.tableName = 'GroupImages'
+    return await queryInterface.bulkDelete(options,{group:groupImages.map(img => img.group)},{})
   }
 };

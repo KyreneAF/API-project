@@ -3,7 +3,7 @@ const express = require('express');
 const { Group, Membership, GroupImage, User,Venue,Attendance,Event} = require('../../db/models');
 const{restoreUser} = require('../../utils/auth');
 const{check,validationResult} = require('express-validator')
-
+const {handleValidationErrors} = require('../../utils/validation')
 const router = express.Router();
 router.use(restoreUser);
 
@@ -26,6 +26,7 @@ const validCreateGroup = [
     check('state')
     .notEmpty()
     .withMessage('State is required'),
+    handleValidationErrors,
   ];
 /* POST image to groupId */
 router.post('/:groupId/images', async (req, res) => {
@@ -64,7 +65,7 @@ router.post('/:groupId/images', async (req, res) => {
 
 
 /* POST group */
-router.post('/', async(req,res) =>{
+router.post('/',validCreateGroup, async(req,res) =>{
     const errors = validationResult(req);
     console.log(errors.param)
     let {name,about,type,private,city,state} = req.body;

@@ -35,7 +35,7 @@ const eventImages =[
     preview:false
 
   },
- 
+
 
 ]
 
@@ -59,6 +59,7 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-  await queryInterface.bulkDelete('EventImages',{event:eventImages.map(img => img.event)},{})
+    options.tableName = 'EventImages'
+  await queryInterface.bulkDelete(options,{event:eventImages.map(img => img.event)},{})
   }
 };

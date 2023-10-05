@@ -70,6 +70,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('MemberShips', { name: memberships.map(member => member.usId) }, {});
+   return await queryInterface.bulkDelete(options, { name: memberships.map(member => member.usId) }, {});
   }
 };

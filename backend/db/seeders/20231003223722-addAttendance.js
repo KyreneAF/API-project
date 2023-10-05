@@ -32,7 +32,7 @@ const attendances =[
     user:'HollyFlores1',
     status:'attending'
   },
- 
+
 ]
 
 
@@ -61,6 +61,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('Attendances',{eventId: attendances.map(attend =>attend.eventName)})
+    return await queryInterface.bulkDelete(options,{eventId: attendances.map(attend =>attend.eventName)},{})
   }
 };
