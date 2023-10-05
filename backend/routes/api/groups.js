@@ -27,8 +27,43 @@ const validCreateGroup = [
     .notEmpty()
     .withMessage('State is required'),
   ];
-/* POST group */
+/* POST image to groupId */
+router.post('/:groupId/images', async (req, res) => {
+    const id = req.params.groupId;
 
+    const currentUserId = req.user.id
+
+   const{url,preview} = req.body;
+
+
+   const currGroup = await Group.findByPk(id)
+   console.log(currGroup,'!!!!!!')
+
+   if(!currGroup || currGroup.organizerId !== currentUserId){
+        return res.status(404).json({
+            "message": "Group couldn't be found"
+        })
+   }
+
+       const createdImg = await GroupImage.create({
+                groupId:id,
+                url,
+                preview,
+
+        })
+        const resObj = {
+            id:createdImg.id,
+            url:createdImg.url,
+            preview:createdImg.preview
+        }
+        return res.json(resObj)
+
+});
+
+
+
+
+/* POST group */
 router.post('/', async(req,res) =>{
     const errors = validationResult(req);
     console.log(errors.param)
@@ -50,8 +85,25 @@ router.post('/', async(req,res) =>{
     return res.status(201).json(createGroup)
 })
 
+/* PUT edit groupId */
+router.put('/:groupId', async(req,res) =>{
+    const currUser = req.user.id;
+    const grpId = req.params.groupId
 
+    let currGroup = await Group.findByPk(grpId)
 
+    if(!currGroup || currGroup.organizerId !== currUser){
+        return res.status(400).json(
+            {
+                "message": "Group couldn't be found"
+              }
+        )
+    }
+    const {name,about,type,private,city,state} = req.body;
+    currGroup = await Group.create({organizerId:currUser,name,about,type,private,city,state});
+    res.json(currGroup)
+
+})
 
 
 /*Get all groups by user*/
@@ -177,7 +229,19 @@ router.get('/', async(req,res)=>{
     res.json(resGroup)
 
 })
+/* DELETE a group */
+router.delete('/:groupId', async (req,res) =>{
+    const grpId = req.params.groupId;
+    const userId = req.user.id;
+    const currGroup = await Group.findByPk(grpId);
 
+    if(!currGroup || currGroup.organizerId !== userId){
+        return res.status(404).json({ "message": "Group couldn't be found"});
+
+    }
+    
+
+})
 
 
 module.exports = router

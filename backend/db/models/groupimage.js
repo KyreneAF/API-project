@@ -11,8 +11,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       GroupImage.belongsTo(models.Group,{
-        foreignKey:'GroupId',
-        
+        foreignKey:'groupId',
+
       })
     }
   }
@@ -34,6 +34,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'GroupImage',
+    defaultScope:{
+      exclude:{
+        attributes:['createdAt','updatedAt','groupId']
+      }
+    }
   });
   return GroupImage;
 };
