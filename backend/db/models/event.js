@@ -15,10 +15,12 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       Event.belongsTo(models.Group,{
-        foreignKey:'groupId'
+        foreignKey:'groupId',
+        onDelete:'CASCADE'
       });
       Event.belongsTo(models.Venue,{
-        foreignKey:'venueId'
+        foreignKey:'venueId',
+        onDelete:'CASCADE'
       });
       Event.hasMany(models.Attendance,{
         foreignKey:'eventId'
@@ -38,8 +40,9 @@ module.exports = (sequelize, DataTypes) => {
       references:{
         model:'Groups',
         key:'id',
-        
+
       }
+
     },
     name: {
       type:DataTypes.STRING,

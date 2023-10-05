@@ -100,9 +100,14 @@ router.put('/:groupId', async(req,res) =>{
         )
     }
     const {name,about,type,private,city,state} = req.body;
-    currGroup = await Group.create({organizerId:currUser,name,about,type,private,city,state});
-    res.json(currGroup)
-
+    const [updatedGroup] = await Group.update(
+        { name, about, type, private, city, state },
+        { where: { id: grpId, organizerId: currUser } }
+    );
+    if (updatedGroup === 1) {
+        currGroup = await Group.findByPk(grpId);
+        return res.json(currGroup);
+    }
 })
 
 
@@ -230,54 +235,25 @@ router.get('/', async(req,res)=>{
 
 })
 /* DELETE a group */
-// router.delete('/:groupId', async (req,res) =>{
-//     const grpId = req.params.groupId;
-//     const userId = req.user.id;
-//     const currGroup = await Group.findByPk(grpId);
+router.delete('/:groupId', async (req,res) =>{
+    const grpId = req.params.groupId;
+    const userId = req.user.id;
+    const currGroup = await Group.findByPk(grpId);
 
-//     console.log(currGroup)
-//     if(!currGroup || currGroup.organizerId !== userId){
-//         return res.status(404).json({ "message": "Group couldn't be found"});
+    console.log(currGroup)
+    if(!currGroup || currGroup.organizerId !== userId){
+        return res.status(404).json({ "message": "Group couldn't be found"});
 
-//     }
-//     await currGroup.destroy();
+    }
+    await currGroup.destroy();
 
-//        return res.json({
-//             "message": "Successfully deleted"
-//         })
+       return res.json({
+            "message": "Successfully deleted"
+        })
 
-// })
-
-
-// DELETE /api/groups/:groupId
-// router.delete('/:groupId', async (req, res) => {
-//   const groupId = req.params.groupId;
-//   const userId = req.user.id;
+})
 
 
-
-//     const group = await Group.findByPk(groupId, {
-//       include: [{
-//         model: User,
-//         as: 'Organizer',
-//         attributes: ['id']
-//       }]
-//     });
-
-//     if (!group) {
-//       return res.status(404).json({ message: "Group couldn't be found" });
-//     }
-
-
-//     if (group.Organizer.id !== userId) {
-//       return res.status(403).json({ message: "Unauthorized: You don't have permission to delete this group" });
-//     }
-
-
-//     await group.destroy();
-
-//     return res.json({ message: 'Successfully deleted' });
-//   })
 
 
 module.exports = router
