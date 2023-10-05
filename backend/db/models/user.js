@@ -5,7 +5,19 @@ const { Model, Validator } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      // define association here
+      User.hasMany(models.Attendance,{
+        foreignKey:'userId',
+
+      });
+      User.hasMany(models.Group,{
+        foreignKey:'organizerId',
+        as: 'Organizer',
+        
+
+      });
+      User.hasMany(models.Membership,{
+        foreignKey:'userId'
+      })
     }
   };
 
@@ -38,8 +50,8 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
         validate: {
           len: [3, 256],
-          isEmail: true
-        }
+          isEmail:true
+        },
       },
       hashedPassword: {
         type: DataTypes.STRING.BINARY,
