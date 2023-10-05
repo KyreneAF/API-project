@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey:'venueId'
       });
       Venue.belongsTo(models.Group,{
-        foreignKey:'groupId'
+        foreignKey:'groupId',
+       
       });
     }
   }

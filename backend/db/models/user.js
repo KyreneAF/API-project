@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
       });
       User.hasMany(models.Group,{
         foreignKey:'organizerId',
-        as: 'Organizer'
+        as: 'Organizer',
+        
 
       });
       User.hasMany(models.Membership,{

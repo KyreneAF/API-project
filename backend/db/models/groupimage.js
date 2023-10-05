@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       GroupImage.belongsTo(models.Group,{
         foreignKey:'groupId',
+        
 
       })
     }
@@ -22,7 +23,8 @@ module.exports = (sequelize, DataTypes) => {
       references:{
         model:'Groups',
         key:'id'
-      }
+      },
+
     },
     url: {
       type:DataTypes.STRING
